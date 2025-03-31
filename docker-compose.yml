@@ -1,0 +1,49 @@
+version: '3.9'
+
+services:
+  frontend:
+    build:
+      context: ./typingstats
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    environment:
+      - NODE_ENV=development
+    networks:
+      - app-network
+
+  backend:
+    build:
+      context: ./djangotutorial
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+      - sqlite_data:/app  # Том для сохранения db.sqlite3
+    environment:
+      - PYTHONUNBUFFERED=1
+    networks:
+      - app-network
+
+  dash:
+    build:
+      context: ./dash_app
+      dockerfile: Dockerfile
+    ports:
+      - "8050:8050"
+    volumes:
+      - ./dash_app:/app
+    environment:
+      - PYTHONUNBUFFERED=1
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+volumes:
+  sqlite_data:
+
+networks:
+  app-network:
+    driver: bridge
